@@ -553,7 +553,7 @@ void http_client::check_bind()
 {
     if (socket)
     {
-        PHPCoroutine::check_bind("http client", socket->has_bound());
+        socket->check_bind();
     }
 }
 

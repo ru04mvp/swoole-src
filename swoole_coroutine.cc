@@ -387,15 +387,10 @@ void PHPCoroutine::check_bind(const char *name, long bind_cid)
     check();
     if (unlikely(bind_cid > 0))
     {
-        swString *buffer = SwooleTG.buffer_stack;
-        sw_get_debug_print_backtrace(buffer, DEBUG_BACKTRACE_IGNORE_ARGS, 3);
-        swoole_error_log(
-            SW_LOG_ERROR, SW_ERROR_CO_HAS_BEEN_BOUND,
-            "%s has already been bound to another coroutine#%ld, "
-            "reading or writing of the same socket in multiple coroutines at the same time is not allowed.\n"
-            "%.*s", name, bind_cid, (int) buffer->length, buffer->str
-        );
-        exit(255);
+        Coroutine *co = Coroutine::get_current();
+        Coroutine *bind_co = Coroutine::get_by_cid(bind_cid);
+        bind_co->push_tail_coroutine(co);
+        co->yield();
     }
 }
 

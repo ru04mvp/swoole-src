@@ -732,7 +732,7 @@ static PHP_METHOD(swoole_client_coro, connect)
         sw_coro_socket_set(cli, zset);
     }
 
-    PHPCoroutine::check_bind("client", cli->has_bound());
+    cli->check_bind();
     cli->set_timeout(timeout == 0 ? PHPCoroutine::socket_connect_timeout : timeout);
     if (!cli->connect(host, port, sock_flag))
     {
@@ -775,7 +775,7 @@ static PHP_METHOD(swoole_client_coro, send)
 
     //clear errno
     SwooleG.error = 0;
-    PHPCoroutine::check_bind("client", cli->has_bound());
+    cli->check_bind();
     double persistent_timeout = cli->get_timeout();
     cli->set_timeout(timeout);
     int ret = cli->send_all(data, data_len);
@@ -821,7 +821,7 @@ static PHP_METHOD(swoole_client_coro, sendto)
         }
         cli->socket->active = 1;
     }
-    PHPCoroutine::check_bind("client", cli->has_bound());
+    cli->check_bind();
     SW_CHECK_RETURN(cli->sendto(ip, port, data, len));
 }
 
@@ -853,7 +853,7 @@ static PHP_METHOD(swoole_client_coro, recvfrom)
     }
 
     zend_string *retval = zend_string_alloc(length + 1, 0);
-    PHPCoroutine::check_bind("client", cli->has_bound());
+    cli->check_bind();
     // cli->set_timeout(timeout, true); TODO
     ssize_t n_bytes = cli->recvfrom(retval->val, length);
     if (n_bytes < 0)
@@ -901,7 +901,7 @@ static PHP_METHOD(swoole_client_coro, sendfile)
     }
     //clear errno
     SwooleG.error = 0;
-    PHPCoroutine::check_bind("client", cli->has_bound());
+    cli->check_bind();
     int ret = cli->sendfile(file, offset, length);
     if (ret < 0)
     {
@@ -930,7 +930,7 @@ static PHP_METHOD(swoole_client_coro, recv)
     {
         RETURN_FALSE;
     }
-    PHPCoroutine::check_bind("client", cli->has_bound());
+    cli->check_bind();
     ssize_t retval ;
     if (cli->open_length_check || cli->open_eof_check)
     {
@@ -1155,7 +1155,7 @@ static PHP_METHOD(swoole_client_coro, enableSSL)
     {
         sw_coro_socket_set_ssl(cli, zset);
     }
-    PHPCoroutine::check_bind("client", cli->has_bound());
+    cli->check_bind();
     if (cli->ssl_handshake() == false)
     {
         RETURN_FALSE;
