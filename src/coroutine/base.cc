@@ -93,6 +93,16 @@ void Coroutine::close()
         Coroutine::on_close(task);
     }
     Coroutine::call_stack_size--;
+
+    if (!tail_coroutines.empty())
+    {
+        Coroutine* co = pop_tail_coroutine();
+        if (co && !co->ctx.end)
+        {
+            co->resume();
+        }
+    }
+
     Coroutine::coroutines.erase(cid);
     delete this;
 }
@@ -131,6 +141,26 @@ void* Coroutine::get_task_by_cid(long cid)
 {
     Coroutine *co = Coroutine::get_by_cid(cid);
     return likely(co) ? co->get_task() : nullptr;
+}
+
+void Coroutine::push_tail_coroutine(Coroutine *co)
+{
+    tail_coroutines.push(co);
+}
+
+Coroutine* Coroutine::pop_tail_coroutine()
+{
+    Coroutine* co = tail_coroutines.front();
+    tail_coroutines.pop();
+    return likely(co) ? co : nullptr;
+}
+
+void Coroutine::clear_tail_coroutine()
+{
+    while (!tail_coroutines.empty())
+    {
+        tail_coroutines.pop();
+    }
 }
 
 void Coroutine::print_list()

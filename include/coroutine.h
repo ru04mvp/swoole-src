@@ -21,6 +21,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <queue>
 
 #define SW_CORO_STACK_ALIGNED_SIZE (4 * 1024)
 #define SW_CORO_MAX_STACK_SIZE     (16 * 1024 * 1024)
@@ -85,6 +86,10 @@ public:
 
     static std::unordered_map<long, Coroutine*> coroutines;
 
+    void push_tail_coroutine(Coroutine *co);
+    Coroutine* pop_tail_coroutine();
+    void clear_tail_coroutine();
+
     static Coroutine* get_current();
     static void* get_current_task();
     static long get_current_cid();
@@ -143,6 +148,7 @@ protected:
     static coro_php_yield_t  on_yield;  /* before php yield coro */
     static coro_php_resume_t on_resume; /* before php resume coro */
     static coro_php_close_t  on_close;  /* before php close coro */
+    std::queue<Coroutine *> tail_coroutines;
 
     sw_coro_state state = SW_CORO_INIT;
     long cid;

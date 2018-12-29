@@ -127,14 +127,9 @@ public:
         long cid = has_bound();
         if (unlikely(cid))
         {
-            swoole_error_log(
-                SW_LOG_ERROR, SW_ERROR_CO_HAS_BEEN_BOUND,
-                "Socket#%d has already been bound to another coroutine#%ld, "
-                "reading or writing of the same socket in multiple coroutines at the same time is not allowed.\n",
-                socket->fd, cid
-            );
-            set_err(SW_ERROR_CO_HAS_BEEN_BOUND);
-            exit(255);
+            Coroutine *co = Coroutine::get_current();
+            coroutine->push_tail_coroutine(co);
+            co->yield();
         }
     }
 
